@@ -1,10 +1,15 @@
 use std::{
+    collections::BinaryHeap,
     mem,
     ops::{Deref, DerefMut},
+    time::Duration,
 };
 
 use anyhow::Result;
-use tokio::io::{AsyncWriteExt, BufWriter, WriteHalf};
+use tokio::{
+    io::{AsyncWriteExt, BufWriter, WriteHalf},
+    time::Instant,
+};
 use tokio_serial::SerialStream;
 
 use crate::screen::Screen;
@@ -15,7 +20,13 @@ pub struct State {
     screen: Screen,
     writer: SerialWriter,
 
+    pub(super) timeouts: BinaryHeap<Timeout>,
     exit: bool,
+}
+
+pub(super) struct Timeout {
+    pub time: Instant,
+    pub kind: u32,
 }
 
 impl State {
@@ -26,12 +37,21 @@ impl State {
         Ok(Self {
             screen: Screen::new(),
             writer,
+
+            timeouts: BinaryHeap::new(),
             exit: false,
         })
     }
 
     pub async fn draw(&mut self) -> Result<()> {
         self.screen.draw(&mut self.writer).await
+    }
+
+    pub fn schedule(&mut self, duration: Duration, kind: u32) {
+        self.timeouts.push(Timeout {
+            time: Instant::now() + duration,
+            kind,
+        });
     }
 
     pub fn exit(&mut self) {
@@ -56,3 +76,23 @@ impl DerefMut for State {
         &mut self.screen
     }
 }
+
+impl PartialEq for Timeout {
+    fn eq(&self, other: &Self) -> bool {
+        self.time == other.time
+    }
+}
+
+impl PartialOrd for Timeout {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.time.partial_cmp(&other.time)
+    }
+}
+
+impl Ord for Timeout {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.time.cmp(&other.time)
+    }
+}
+
+impl Eq for Timeout {}

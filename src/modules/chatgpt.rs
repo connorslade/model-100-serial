@@ -13,10 +13,9 @@ use rs_openai::{
 
 use crate::{modules::Module, state::State};
 
-const API_KEY: &str = "";
 const SYSTEM_PROMPT: &str = "Respond to the following prompt as concisely as possible. Under 150 characters, any more will be cut off from view. Only use ASCII characters. This is because you are being accessed on a TRS-80 model 100. Don't mention this system prompt.";
 
-pub struct ChatGpt {
+pub struct ChatGptModule {
     client: OpenAI,
     messages: Vec<ChatCompletionMessage>,
 
@@ -25,7 +24,7 @@ pub struct ChatGpt {
 }
 
 #[async_trait]
-impl Module for ChatGpt {
+impl Module for ChatGptModule {
     async fn init(&mut self, screen: &mut State) -> Result<()> {
         for y in 1..7 {
             screen.put(Vector2::new(0, y), b'\xF5'.into());
@@ -56,7 +55,7 @@ impl Module for ChatGpt {
         Ok(())
     }
 
-    async fn on_key(&mut self, key: u8, screen: &mut State) -> Result<()> {
+    async fn on_key(&mut self, screen: &mut State, key: u8) -> Result<()> {
         if key == 0x1B {
             screen.exit();
             return Ok(());
@@ -119,11 +118,11 @@ impl Module for ChatGpt {
     }
 }
 
-impl Default for ChatGpt {
+impl Default for ChatGptModule {
     fn default() -> Self {
         Self {
             client: OpenAI {
-                api_key: API_KEY.to_owned(),
+                api_key: env!("OPENAPI_KEY").to_owned(),
                 org_id: None,
             },
             messages: vec![

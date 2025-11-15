@@ -3,7 +3,7 @@ use async_trait::async_trait;
 use nalgebra::Vector2;
 
 use crate::{
-    modules::{Module, chatgpt::ChatGpt},
+    modules::{Module, chatgpt::ChatGptModule, printer::PrinterModule},
     state::State,
 };
 
@@ -14,9 +14,18 @@ pub struct Menu {
 
 impl Menu {
     async fn draw(&mut self, screen: &mut State) -> Result<()> {
-        const OPTIONS: &[&[u8]] = &[b"Chat-GPT", b"About", b"Exit"];
+        const OPTIONS: &[&[u8]] = &[b"Chat-GPT", b"Printer", b"Exit"];
 
+        screen.clear();
         for (i, option) in OPTIONS.iter().enumerate() {
+            if self.selection == i as u8 {
+                screen.put(Vector2::new(18 - option.len() / 2, i + 1), b'>'.into());
+                screen.put(
+                    Vector2::new(21 - option.len() / 2 + option.len(), i + 1),
+                    b'<'.into(),
+                );
+            }
+
             screen.write_string_inverted(
                 Vector2::new(20 - option.len() / 2, i + 1),
                 option,
@@ -36,9 +45,9 @@ impl Module for Menu {
         Ok(())
     }
 
-    async fn on_key(&mut self, key: u8, screen: &mut State) -> Result<()> {
+    async fn on_key(&mut self, screen: &mut State, key: u8) -> Result<()> {
         if let Some(module) = &mut self.module {
-            module.on_key(key, screen).await?;
+            module.on_key(screen, key).await?;
 
             if screen.take_exit() {
                 screen.clear();
@@ -52,8 +61,9 @@ impl Module for Menu {
             0x1E => self.selection = self.selection.saturating_sub(1),
             0x1F => self.selection += 1,
             0x0D => {
-                let mut module = match self.selection {
-                    0 => Box::new(ChatGpt::default()),
+                let mut module: Box<dyn Module + Send> = match self.selection {
+                    0 => Box::new(ChatGptModule::default()),
+                    1 => Box::new(PrinterModule::default()),
                     _ => unreachable!(),
                 };
 
@@ -65,6 +75,14 @@ impl Module for Menu {
             _ => {}
         };
         self.draw(screen).await?;
+
+        Ok(())
+    }
+
+    async fn callback(&mut self, screen: &mut State, kind: u32) -> Result<()> {
+        if let Some(module) = &mut self.module {
+            module.callback(screen, kind).await?;
+        }
 
         Ok(())
     }
