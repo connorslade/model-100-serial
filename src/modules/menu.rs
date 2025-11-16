@@ -46,6 +46,11 @@ impl Module for Menu {
     }
 
     async fn on_key(&mut self, screen: &mut State, key: u8) -> Result<()> {
+        if key == 0x12 {
+            screen.redraw().await?;
+            return Ok(());
+        }
+
         if let Some(module) = &mut self.module {
             module.on_key(screen, key).await?;
 

@@ -122,6 +122,18 @@ impl Screen {
         Ok(())
     }
 
+    async fn write_char<T: AsyncWrite + Unpin>(&mut self, writer: &mut T, chr: Char) -> Result<()> {
+        if chr.inverted != self.inverted {
+            self.inverted ^= true;
+            writer
+                .write_all([b"\x1Bq", b"\x1Bp"][self.inverted as usize])
+                .await?;
+        }
+
+        writer.write_u8(chr.char).await?;
+        Ok(())
+    }
+
     pub async fn draw<T: AsyncWrite + Unpin>(&mut self, writer: &mut T) -> Result<()> {
         for i in 0..Self::SIZE {
             let (prev, chr) = (self.previous[i], self.chars[i]);
@@ -132,18 +144,27 @@ impl Screen {
             let pos = Self::from_index(i).unwrap();
             self.move_cursor(pos, writer).await?;
 
-            if chr.inverted != self.inverted {
-                self.inverted ^= true;
-                writer
-                    .write_all([b"\x1Bq", b"\x1Bp"][self.inverted as usize])
-                    .await?;
-            }
+            self.write_char(writer, chr).await?;
 
-            writer.write_u8(chr.char).await?;
             let idx = Screen::index(self.cursor).unwrap();
             if idx + 1 < Self::SIZE {
                 self.cursor = Screen::from_index(idx + 1).unwrap();
             }
+        }
+
+        writer.flush().await?;
+        self.previous = self.chars.clone();
+
+        Ok(())
+    }
+
+    pub async fn redraw<T: AsyncWrite + Unpin>(&mut self, writer: &mut T) -> Result<()> {
+        writer.write_all(b"\x0C\x1Bq").await?;
+        self.inverted = false;
+        self.cursor = Vector2::new(Self::WIDTH - 1, Self::HEIGHT - 1);
+
+        for chr in self.chars {
+            self.write_char(writer, chr).await?;
         }
 
         writer.flush().await?;

@@ -16,7 +16,7 @@ use crate::{
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> Result<()> {
-    let port = tokio_serial::new("/dev/ttyUSB1", 19_200)
+    let port = tokio_serial::new("/dev/ttyUSB0", 19_200)
         .flow_control(FlowControl::Software)
         .open_native_async()?;
     let (mut rx, tx) = io::split(port);

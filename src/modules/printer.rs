@@ -2,6 +2,7 @@ use std::{mem, time::Duration};
 
 use anyhow::Result;
 use async_trait::async_trait;
+use markdown2pdf::config::ConfigSource;
 use nalgebra::Vector2;
 use printers::{
     common::base::{job::PrinterJobOptions, printer::Printer},
@@ -93,8 +94,14 @@ impl Module for PrinterModule {
                         (*byte == b'\r').then(|| *byte = b'\n');
                     }
 
+                    let pdf = markdown2pdf::parse_into_bytes(
+                        String::from_utf8_lossy(file).into_owned(),
+                        ConfigSource::Default,
+                        None,
+                    )?;
+
                     let job_id = self.printers[*printer]
-                        .print(file, PrinterJobOptions::none())
+                        .print(&pdf, PrinterJobOptions::none())
                         .unwrap();
                     self.state = StateMachine::Printing {
                         printer: *printer,

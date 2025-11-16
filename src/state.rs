@@ -47,6 +47,10 @@ impl State {
         self.screen.draw(&mut self.writer).await
     }
 
+    pub async fn redraw(&mut self) -> Result<()> {
+        self.screen.redraw(&mut self.writer).await
+    }
+
     pub fn schedule(&mut self, duration: Duration, kind: u32) {
         self.timeouts.push(Timeout {
             time: Instant::now() + duration,
