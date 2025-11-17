@@ -1,4 +1,5 @@
 use std::{
+    cmp::Ordering,
     collections::BinaryHeap,
     mem,
     ops::{Deref, DerefMut},
@@ -88,13 +89,13 @@ impl PartialEq for Timeout {
 }
 
 impl PartialOrd for Timeout {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.time.partial_cmp(&other.time)
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
 impl Ord for Timeout {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+    fn cmp(&self, other: &Self) -> Ordering {
         self.time.cmp(&other.time)
     }
 }

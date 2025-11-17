@@ -107,7 +107,7 @@ impl Module for ChatGptModule {
         screen.rect(Vector2::new(0, 6), Vector2::new(39, 1), b' '.into());
         screen.rect(Vector2::new(1, 1), Vector2::new(38, 4), b' '.into());
 
-        screen.write_string(Vector2::new(0, 6), &display);
+        screen.write_string(Vector2::new(0, 6), display);
         screen.put(Vector2::new(39, 6), b'\xF5'.into());
         screen.put(Vector2::new(display.len(), 6), b'\xE9'.into());
 

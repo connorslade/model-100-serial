@@ -7,6 +7,7 @@ use crate::{
     state::State,
 };
 
+#[derive(Default)]
 pub struct Menu {
     selection: u8,
     module: Option<Box<dyn Module + Send>>,
@@ -90,14 +91,5 @@ impl Module for Menu {
         }
 
         Ok(())
-    }
-}
-
-impl Default for Menu {
-    fn default() -> Self {
-        Self {
-            selection: 0,
-            module: None,
-        }
     }
 }

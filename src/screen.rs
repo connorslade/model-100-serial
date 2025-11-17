@@ -153,7 +153,7 @@ impl Screen {
         }
 
         writer.flush().await?;
-        self.previous = self.chars.clone();
+        self.previous = self.chars;
 
         Ok(())
     }
@@ -168,7 +168,7 @@ impl Screen {
         }
 
         writer.flush().await?;
-        self.previous = self.chars.clone();
+        self.previous = self.chars;
 
         Ok(())
     }
