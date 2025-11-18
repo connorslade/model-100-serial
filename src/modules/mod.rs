@@ -4,6 +4,7 @@ use async_trait::async_trait;
 use crate::state::State;
 
 pub mod chatgpt;
+pub mod keyboard;
 pub mod menu;
 pub mod printer;
 

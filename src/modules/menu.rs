@@ -3,7 +3,7 @@ use async_trait::async_trait;
 use nalgebra::Vector2;
 
 use crate::{
-    modules::{Module, chatgpt::ChatGptModule, printer::PrinterModule},
+    modules::{Module, chatgpt::ChatGptModule, keyboard::KeyboardModule, printer::PrinterModule},
     state::State,
 };
 
@@ -15,7 +15,7 @@ pub struct Menu {
 
 impl Menu {
     async fn draw(&mut self, screen: &mut State) -> Result<()> {
-        const OPTIONS: &[&[u8]] = &[b"Chat-GPT", b"Printer", b"Exit"];
+        const OPTIONS: &[&[u8]] = &[b"Chat-GPT", b"Printer", b"Keyboard", b"Exit"];
 
         screen.clear();
         for (i, option) in OPTIONS.iter().enumerate() {
@@ -70,6 +70,7 @@ impl Module for Menu {
                 let mut module: Box<dyn Module + Send> = match self.selection {
                     0 => Box::new(ChatGptModule::default()),
                     1 => Box::new(PrinterModule::default()),
+                    2 => Box::new(KeyboardModule::default()),
                     _ => unreachable!(),
                 };
 

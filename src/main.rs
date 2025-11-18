@@ -1,3 +1,5 @@
+use std::future;
+
 use anyhow::Result;
 use tokio::{
     io::{self, AsyncReadExt, BufWriter},
@@ -32,7 +34,7 @@ async fn main() -> Result<()> {
                 if let Some(t) = screen.timeouts.peek() {
                     tokio::time::sleep_until(t.time).await;
                 } else {
-                    std::future::pending::<()>().await;
+                    future::pending::<()>().await;
                 }
             } => {
                 let kind = screen.timeouts.pop().unwrap().kind;

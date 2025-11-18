@@ -19,3 +19,6 @@ rs_openai = "0.5.0"
 # Printer
 printers = "2.2.0"
 markdown2pdf = "0.1.9"
+
+# Keyboard
+enigo = { version = "0.6.1", default-features = false, features = ["wayland"] }
