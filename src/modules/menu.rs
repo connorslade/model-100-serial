@@ -57,6 +57,7 @@ impl Module for Menu {
 
             if screen.take_exit() {
                 screen.clear();
+                screen.unschedule(None);
                 self.draw(screen).await?;
                 self.module = None;
             }

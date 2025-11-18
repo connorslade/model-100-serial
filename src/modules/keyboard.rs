@@ -26,25 +26,24 @@ impl Module for KeyboardModule {
             return Ok(());
         }
 
-        if matches!(key, 1..=26) {
+        if matches!(key, 1..=7 | 9..=12 | 14..=26) {
             let _ = self.enigo.key(Key::Control, Direction::Press);
             let _ = self
                 .enigo
                 .key(Key::Unicode((key - 1 + b'a') as char), Direction::Click);
             let _ = self.enigo.key(Key::Control, Direction::Release);
-            return Ok(());
+        } else {
+            let key = match key {
+                0x1B => Key::Escape,
+                0x1D => Key::LeftArrow,
+                0x1C => Key::RightArrow,
+                0x1E => Key::UpArrow,
+                0x1F => Key::DownArrow,
+                _ => Key::Unicode(key as char),
+            };
+
+            let _ = self.enigo.key(key, Direction::Click);
         }
-
-        let key = match key {
-            0x1B => Key::Escape,
-            0x1D => Key::LeftArrow,
-            0x1C => Key::RightArrow,
-            0x1E => Key::UpArrow,
-            0x1F => Key::DownArrow,
-            _ => Key::Unicode(key as char),
-        };
-
-        let _ = self.enigo.key(key, Direction::Click);
 
         Ok(())
     }

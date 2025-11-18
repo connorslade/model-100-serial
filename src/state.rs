@@ -59,6 +59,13 @@ impl State {
         });
     }
 
+    pub fn unschedule(&mut self, kind: Option<u32>) {
+        self.timeouts.retain(|x| match kind {
+            Some(kind) => x.kind != kind,
+            None => false,
+        });
+    }
+
     pub fn exit(&mut self) {
         self.exit = true;
     }
